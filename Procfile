@@ -1,1 +1,1 @@
-worker : chmod +x start.sh && bash start.sh
+worker: python3 -m ytdlbot

@@ -10,7 +10,7 @@
 ## Setup Bot
     - Change configuration config.py  File
     - install dependencies
-    - python3 -m bot
+    - python3 -m ytdlbot
     
 ## Thanks ❤️
 * [Spechide](https://telegram.dog/SpEcHIDe) for his [AnyDlBot](https://github.com/SpEcHiDe/AnyDLBot)

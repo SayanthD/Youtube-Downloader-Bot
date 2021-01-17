@@ -1,13 +1,10 @@
 from __future__ import unicode_literals
-from pyrogram import (
-    Client,
-    filters as Filters,
-    StopPropagation
-)
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from pyrogram.types import InlineKeyboardButton
 
 import youtube_dl
-from utils.util import humanbytes
+from ytdlbot import LOGGER
+from ytdlbot.helper_utils.util import humanbytes
 import asyncio
 
 
@@ -81,7 +78,7 @@ async def downloadvideocli(command_to_exec):
     stdout, stderr = await process.communicate()
     e_response = stderr.decode().strip()
     t_response = stdout.decode().strip()
-    print(e_response)
+    LOGGER.info(e_response)
     filename = t_response.split("Merging formats into")[-1].split('"')[1]
     return filename
 
@@ -96,7 +93,7 @@ async def downloadaudiocli(command_to_exec):
     stdout, stderr = await process.communicate()
     e_response = stderr.decode().strip()
     t_response = stdout.decode().strip()
-    print("Download error:", e_response)
+    LOGGER.info("Download error:", e_response)
 
     return (
         t_response.split("Destination")[-1].split("Deleting")[0].split(":")[-1].strip()

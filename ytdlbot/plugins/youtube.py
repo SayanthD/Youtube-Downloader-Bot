@@ -1,18 +1,16 @@
 from datetime import datetime, timedelta
-from pyrogram import (
-    Client,
-    filters as Filters)
 
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup
 
-from bot import user_time
-from config import youtube_next_fetch
-from helper.ytdlfunc import extractYt, create_buttons
+from ytdlbot.config import Config
+from ytdlbot import user_time
+from ytdlbot.helper_utils.ytdlfunc import extractYt, create_buttons
 
 ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
 
 
-@Client.on_message(Filters.regex(ytregex))
+@Client.on_message(filters.regex(ytregex))
 async def ytdl(_, message):
     userLastDownloadTime = user_time.get(message.chat.id)
     try:
@@ -29,8 +27,7 @@ async def ytdl(_, message):
         title, thumbnail_url, formats = extractYt(url)
 
         now = datetime.now()
-        user_time[message.chat.id] = now + \
-                                     timedelta(minutes=youtube_next_fetch)
+        user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
 
     except Exception:
         await message.reply_text("`Failed To Fetch Youtube Data... 😔 \nPossible Youtube Blocked server ip \n#error`")
@@ -42,11 +39,9 @@ async def ytdl(_, message):
         # https://www.youtube.com/watch?v=lTTajzrSkCw
         await message.reply_photo(thumbnail_url, caption=title, reply_markup=buttons)
         await sentm.delete()
-    except Exception as e:
+    except Exception:
         try:
             thumbnail_url = "https://telegra.ph/file/ce37f8203e1903feed544.png"
             await message.reply_photo(thumbnail_url, caption=title, reply_markup=buttons)
         except Exception as e:
-            await sentm.edit(
-            f"<code>{e}</code> #Error")
-
+            await sentm.edit(f"<code>{e}</code> #Error")

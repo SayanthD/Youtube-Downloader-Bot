@@ -40,7 +40,3 @@ def duration(vid_file_path):
                 return float(s['duration'])
 
     raise Exception('duration Not found')
-
-
-if __name__ == "__main__":
-    print(duration("examplefile.mp4"))  # 10.008

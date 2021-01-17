@@ -11,8 +11,10 @@ from pyrogram.types import (
     InputMediaDocument,
 )
 
-from helper.ffmfunc import duration
-from helper.ytdlfunc import downloadvideocli, downloadaudiocli
+from ytdlbot import LOGGER
+from ytdlbot.config import Config
+from ytdlbot.helper_utils.ffmfunc import duration
+from ytdlbot.helper_utils.ytdlfunc import downloadvideocli, downloadaudiocli
 
 
 @Client.on_callback_query()
@@ -22,7 +24,7 @@ async def catch_youtube_fmtid(c, m):
         yturl = cb_data.split("||")[-1]
         format_id = cb_data.split("||")[-2]
         media_type = cb_data.split("||")[-3].strip()
-        print(media_type)
+        LOGGER.info(media_type)
         if media_type == "audio":
             buttons = InlineKeyboardMarkup(
                 [
@@ -63,11 +65,11 @@ async def catch_youtube_dldata(c, q):
     yturl = cb_data.split("||")[-1]
     format_id = cb_data.split("||")[-2]
     if not cb_data.startswith(("video", "audio", "docaudio", "docvideo")):
-        print("no data found")
+        LOGGER.info("no data found")
         raise ContinuePropagation
 
     filext = "%(title)s.%(ext)s"
-    userdir = os.path.join(os.getcwd(), "downloads", str(q.message.chat.id))
+    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(q.message.chat.id))
 
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
@@ -110,8 +112,10 @@ async def catch_youtube_dldata(c, q):
     med = None
     if cb_data.startswith("audio"):
         filename = await downloadaudiocli(audio_command)
+        dur = round(duration(filename))
         med = InputMediaAudio(
             media=filename,
+            duration=dur,
             caption=os.path.basename(filename),
             title=os.path.basename(filename),
         )
@@ -135,7 +139,6 @@ async def catch_youtube_dldata(c, q):
 
     if cb_data.startswith("docvideo"):
         filename = await downloadvideocli(video_command)
-        dur = round(duration(filename))
         med = InputMediaDocument(
             media=filename,
             caption=os.path.basename(filename),
@@ -143,11 +146,11 @@ async def catch_youtube_dldata(c, q):
     if med:
         loop.create_task(send_file(c, q, med, filename))
     else:
-        print("med not found")
+        LOGGER.info("med not found")
 
 
 async def send_file(c, q, med, filename):
-    print(med)
+    LOGGER.info(med)
     try:
         await q.edit_message_reply_markup(
             InlineKeyboardMarkup(
@@ -158,7 +161,7 @@ async def send_file(c, q, med, filename):
         # this one is not working
         await q.edit_message_media(media=med)
     except Exception as e:
-        print(e)
+        LOGGER.info(e)
         await q.edit_message_text(e)
     finally:
         try:
