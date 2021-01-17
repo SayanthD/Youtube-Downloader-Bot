@@ -8,26 +8,17 @@ from ytdlbot.helper_utils.util import humanbytes
 import asyncio
 
 
-def buttonmap(item):
-    quality = item["format"]
-    if "audio" in quality:
-        return [
-            InlineKeyboardButton(
-                f"{quality} 🎵 {humanbytes(item['filesize'])}",
-                callback_data=f"ytdata||audio||{item['format_id']}||{item['yturl']}",
-            )
-        ]
-    else:
-        return [
-            InlineKeyboardButton(
-                f"{quality} 📹 {humanbytes(item['filesize'])}",
-                callback_data=f"ytdata||video||{item['format_id']}||{item['yturl']}",
-            )
-        ]
-
-
-# Return a array of Buttons
 def create_buttons(quailitylist):
+    def buttonmap(item):
+        if item["format"]:
+            media_type = "Audio" if "audio" in item["format"] else "Video"
+            return [
+                InlineKeyboardButton(
+                    f"{item['format']} {humanbytes(item['filesize'])}",
+                    callback_data=f"ytdata|{media_type}|{item['format_id']}|{item['yturl']}"
+                )
+            ]
+    # Return a array of Buttons
     return map(buttonmap, quailitylist)
 
 
@@ -39,7 +30,7 @@ def extractYt(yturl):
         r = ydl.extract_info(yturl, download=False)
         for format in r["formats"]:
             # Filter dash video(without audio)
-            if not "dash" in str(format["format"]).lower():
+            if "dash" not in str(format["format"]).lower():
                 qualityList.append(
                     {
                         "format": format["format"],
