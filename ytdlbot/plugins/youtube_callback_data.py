@@ -29,10 +29,10 @@ async def catch_youtube_fmtid(_, m):
                 [
                     [
                         InlineKeyboardButton(
-                            f"{media_type}", callback_data=f"{media_type}|{format_id}|{yturl}"
+                            f"{media_type}", callback_data=f"{media_type}|{media_type}|{format_id}|{yturl}"
                         ),
                         InlineKeyboardButton(
-                            "Document", callback_data=f"Document|{format_id}|{yturl}"
+                            "Document", callback_data=f"{media_type}|Document|{format_id}|{yturl}"
                         ),
                     ]
                 ]
@@ -46,11 +46,8 @@ async def catch_youtube_fmtid(_, m):
 @Client.on_callback_query()
 async def catch_youtube_dldata(c, q):
     cb_data = q.data.strip()
-    # Callback Data Check
-    _, format_id, yturl = cb_data.split("|")
-    if not cb_data.startswith(("Video", "Audio", "Document")):
-        LOGGER.info("no data found")
-        raise ContinuePropagation
+    # Callback Data Assigning
+    media_type, send_as, format_id, yturl = cb_data.split("|")
 
     filext = "%(title)s.%(ext)s"
     userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(q.message.reply_to_message.message_id))
@@ -66,7 +63,7 @@ async def catch_youtube_dldata(c, q):
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
     # The below and few other logics are copied from AnyDLBot/PublicLeech
-    if cb_data.startswith("Audio"):
+    if media_type == "Audio":
         cmd_to_exec = ["youtube-dl", "-c",
                        "--prefer-ffmpeg",
                        "--extract-audio",
@@ -82,7 +79,9 @@ async def catch_youtube_dldata(c, q):
                        "--hls-prefer-ffmpeg",
                        yturl,
                        ]
-    output, error = await shell_exec(cmd_to_exec)
+    _, error = await shell_exec(cmd_to_exec)
+    if error:
+        LOGGER.info(error)
 
     file_directory = os.listdir(os.path.dirname(filepath))
     for content in file_directory:
@@ -91,7 +90,7 @@ async def catch_youtube_dldata(c, q):
     loop = asyncio.get_event_loop()
 
     med = None
-    if cb_data.startswith("Audio"):
+    if send_as == "Audio":
         dur = round(duration(file_name))
         med = InputMediaAudio(
             media=file_name,
@@ -100,7 +99,7 @@ async def catch_youtube_dldata(c, q):
             title=os.path.basename(file_name),
         )
 
-    elif cb_data.startswith("Video"):
+    elif send_as == "Video":
         dur = round(duration(file_name))
         med = InputMediaVideo(
             media=file_name,
