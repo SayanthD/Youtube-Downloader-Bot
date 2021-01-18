@@ -1,5 +1,6 @@
 import asyncio
 import os
+import shutil
 
 from pyrogram import Client, ContinuePropagation
 
@@ -14,11 +15,11 @@ from pyrogram.types import (
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
 from ytdlbot.helper_utils.ffmfunc import duration
-from ytdlbot.helper_utils.ytdlfunc import downloadvideocli, downloadaudiocli
+from ytdlbot.helper_utils.ytdlfunc import shell_exec
 
 
 @Client.on_callback_query()
-async def catch_youtube_fmtid(c, m):
+async def catch_youtube_fmtid(_, m):
     cb_data = m.data
     if cb_data.startswith("ytdata"):
         _, media_type, format_id, yturl = cb_data.split("|")
@@ -47,12 +48,12 @@ async def catch_youtube_dldata(c, q):
     cb_data = q.data.strip()
     # Callback Data Check
     _, format_id, yturl = cb_data.split("|")
-    if not cb_data.startswith(("Video", "Audio", "docaudio", "Document")):
+    if not cb_data.startswith(("Video", "Audio", "Document")):
         LOGGER.info("no data found")
         raise ContinuePropagation
 
     filext = "%(title)s.%(ext)s"
-    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(q.message.chat.id))
+    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(q.message.reply_to_message.message_id))
 
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
@@ -64,65 +65,63 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    audio_command = ["youtube-dl", "-c", "--prefer-ffmpeg",
-                     "--extract-audio",
-                     "--audio-format", "mp3",
-                     "--audio-quality", format_id,
-                     "-o", filepath,
-                     yturl,
-                     ]
+    # The below and few other logics are copied from AnyDLBot/PublicLeech
+    if cb_data.startswith("Audio"):
+        cmd_to_exec = ["youtube-dl", "-c",
+                       "--prefer-ffmpeg",
+                       "--extract-audio",
+                       "--audio-format", "mp3",
+                       "--audio-quality", format_id,
+                       "-o", filepath,
+                       yturl,
+                       ]
+    else:
+        cmd_to_exec = ["youtube-dl", "-c", "--embed-subs",
+                       "-f", f"{format_id}+bestaudio",
+                       "-o", filepath,
+                       "--hls-prefer-ffmpeg",
+                       yturl,
+                       ]
+    output, error = await shell_exec(cmd_to_exec)
 
-    video_command = ["youtube-dl", "-c", "--embed-subs",
-                     "-f", f"{format_id}+bestaudio",
-                     "-o", filepath,
-                     "--hls-prefer-ffmpeg",
-                     yturl,
-                     ]
-
+    file_directory = os.listdir(os.path.dirname(filepath))
+    for content in file_directory:
+        file_name = os.path.join(userdir, content)
 
     loop = asyncio.get_event_loop()
 
     med = None
     if cb_data.startswith("Audio"):
-        filename = await downloadaudiocli(audio_command)
-        dur = round(duration(filename))
+        dur = round(duration(file_name))
         med = InputMediaAudio(
-            media=filename,
+            media=file_name,
             duration=dur,
-            caption=os.path.basename(filename),
-            title=os.path.basename(filename),
+            caption=os.path.basename(file_name),
+            title=os.path.basename(file_name),
         )
 
-    if cb_data.startswith("Video"):
-        filename = await downloadvideocli(video_command)
-        dur = round(duration(filename))
+    elif cb_data.startswith("Video"):
+        dur = round(duration(file_name))
         med = InputMediaVideo(
-            media=filename,
+            media=file_name,
             duration=dur,
-            caption=os.path.basename(filename),
+            caption=os.path.basename(file_name),
             supports_streaming=True,
         )
 
-    if cb_data.startswith("docaudio"):
-        filename = await downloadaudiocli(audio_command)
-        med = InputMediaDocument(
-            media=filename,
-            caption=os.path.basename(filename),
-        )
-
-    if cb_data.startswith("Document"):
-        filename = await downloadvideocli(video_command)
-        med = InputMediaDocument(
-            media=filename,
-            caption=os.path.basename(filename),
-        )
-    if med:
-        loop.create_task(send_file(c, q, med, filename))
     else:
-        LOGGER.info("med not found")
+        med = InputMediaDocument(
+            media=file_name,
+            caption=os.path.basename(file_name),
+        )
+
+    if med:
+        loop.create_task(send_file(c, q, med, userdir))
+    else:
+        LOGGER.info("Media not found")
 
 
-async def send_file(c, q, med, filename):
+async def send_file(c, q, med, userdir):
     LOGGER.info(med)
     try:
         await q.edit_message_reply_markup(
@@ -137,7 +136,4 @@ async def send_file(c, q, med, filename):
         LOGGER.info(e)
         await q.edit_message_text(e)
     finally:
-        try:
-            os.remove(filename)
-        except:
-            pass
+        shutil.rmtree(userdir, ignore_errors=True)  # Cleanup
