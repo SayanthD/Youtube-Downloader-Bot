@@ -13,13 +13,10 @@ ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[
 @Client.on_message(filters.regex(ytregex))
 async def ytdl(_, message):
     userLastDownloadTime = user_time.get(message.chat.id)
-    try:
-        if userLastDownloadTime > datetime.now():
-            wait_time = round((userLastDownloadTime - datetime.now()).total_seconds() / 60, 2)
-            await message.reply_text(f"`Wait {wait_time} Minutes before next Request`")
-            return
-    except:
-        pass
+    if userLastDownloadTime and userLastDownloadTime > datetime.now():
+        wait_time = round((userLastDownloadTime - datetime.now()).total_seconds() / 60, 2)
+        await message.reply_text(f"`Wait {wait_time} Minutes before next Request`")
+        return
 
     url = message.text.strip()
     await message.reply_chat_action("typing")
@@ -43,5 +40,6 @@ async def ytdl(_, message):
         try:
             thumbnail_url = "https://telegra.ph/file/ce37f8203e1903feed544.png"
             await message.reply_photo(thumbnail_url, caption=title, reply_markup=buttons)
+            await sentm.delete()
         except Exception as e:
             await sentm.edit(f"<code>{e}</code> #Error")

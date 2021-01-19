@@ -16,5 +16,5 @@ async def _start(_, message):
 
 @Client.on_message(filters.command(["help"]))
 async def _help(_, message):
-    helptxt = f"Currently Only supports Youtube Single  (No playlist) Just Send Youtube Url"
+    helptxt = "Currently Only supports Youtube Single  (No playlist) Just Send Youtube Url"
     await message.reply_text(helptxt)

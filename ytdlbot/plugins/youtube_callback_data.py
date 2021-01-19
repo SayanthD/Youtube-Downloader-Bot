@@ -64,7 +64,9 @@ async def catch_youtube_dldata(c, q):
 
     # The below and few other logics are copied from AnyDLBot/PublicLeech
     if media_type == "Audio":
-        cmd_to_exec = ["youtube-dl", "-c",
+        cmd_to_exec = ["youtube-dl",
+                       "-c",
+                       "--add-metadata",
                        "--prefer-ffmpeg",
                        "--extract-audio",
                        "--audio-format", "mp3",
@@ -73,7 +75,10 @@ async def catch_youtube_dldata(c, q):
                        yturl,
                        ]
     else:
-        cmd_to_exec = ["youtube-dl", "-c", "--embed-subs",
+        cmd_to_exec = ["youtube-dl",
+                       "-c",
+                       "--add-metadata",
+                       "--embed-subs",
                        "-f", f"{format_id}+bestaudio",
                        "-o", filepath,
                        "--hls-prefer-ffmpeg",
