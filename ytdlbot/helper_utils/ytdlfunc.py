@@ -5,7 +5,6 @@ from pyrogram.types import InlineKeyboardButton
 import youtube_dl
 from ytdlbot import LOGGER
 from ytdlbot.helper_utils.util import humanbytes
-import asyncio
 
 
 def create_buttons(quailitylist):
@@ -43,28 +42,32 @@ def extractYt(yturl):
         return r["title"], r["thumbnail"], qualityList
 
 
-#  Need to work on progress
-
-# def downloadyt(url, fmid, custom_progress):
-#     ydl_opts = {
-#         'format': f"{fmid}+bestaudio",
-#         "outtmpl": "test+.%(ext)s",
-#         'noplaylist': True,
-#         'progress_hooks': [custom_progress],
-#     }
-#     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-#         ydl.download([url])
-
-
-# https://github.com/SpEcHiDe/AnyDLBot
-
-
-async def shell_exec(command_to_exec):
-    process = await asyncio.create_subprocess_exec(
-        *command_to_exec,
-        # stdout must a pipe to be accessible as process.stdout
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    stdout, stderr = await process.communicate()
-    return stdout.decode().strip(), stderr.decode().strip()
+# The codes below were referenced after
+# https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
+async def yt_download(url, media_type, format_id, output):
+    ytdl_opts = {}
+    if media_type == "Audio":
+        ytdl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": f"{output}",
+            "noplaylist": True,
+            "postprocessors": [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": f"{format_id}"
+            }, {
+                    "key": "FFmpegMetadata"
+                }],
+        }
+    elif media_type == "Video":
+        ytdl_opts = {
+            "format": f"{format_id}+bestaudio",
+            "outtmpl": f"{output}",
+            "noplaylist": True,
+            "postprocessors": [{
+                "key": "FFmpegMetadata"
+            }],
+        }
+    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
+        ydl.download([url])
+    return True

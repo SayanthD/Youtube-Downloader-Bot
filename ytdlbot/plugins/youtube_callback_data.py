@@ -15,7 +15,7 @@ from pyrogram.types import (
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
 from ytdlbot.helper_utils.ffmfunc import duration
-from ytdlbot.helper_utils.ytdlfunc import shell_exec
+from ytdlbot.helper_utils.ytdlfunc import yt_download
 
 
 @Client.on_callback_query()
@@ -62,39 +62,16 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    # The below and few other logics are copied from AnyDLBot/PublicLeech
-    if media_type == "Audio":
-        cmd_to_exec = ["youtube-dl",
-                       "-c",
-                       "--add-metadata",
-                       "--prefer-ffmpeg",
-                       "--extract-audio",
-                       "--audio-format", "mp3",
-                       "--audio-quality", format_id,
-                       "-o", filepath,
-                       yturl,
-                       ]
-    else:
-        cmd_to_exec = ["youtube-dl",
-                       "-c",
-                       "--add-metadata",
-                       "--embed-subs",
-                       "-f", f"{format_id}+bestaudio",
-                       "-o", filepath,
-                       "--hls-prefer-ffmpeg",
-                       yturl,
-                       ]
-    _, error = await shell_exec(cmd_to_exec)
-    if error:
-        LOGGER.info(error)
+    fetch_media = await yt_download(yturl, media_type, format_id, filepath)
+    if fetch_media:
+        file_directory = os.listdir(os.path.dirname(filepath))
+        for content in file_directory:
+            file_name = os.path.join(userdir, content)
 
-    file_directory = os.listdir(os.path.dirname(filepath))
-    for content in file_directory:
-        file_name = os.path.join(userdir, content)
+    LOGGER.info(file_name)
 
     loop = asyncio.get_event_loop()
 
-    med = None
     if send_as == "Audio":
         dur = round(duration(file_name))
         med = InputMediaAudio(
