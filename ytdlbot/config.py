@@ -7,4 +7,5 @@ class Config:
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
     DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "./downloads")
     TIMEOUT = int(os.environ.get("TIMEOUT", 0))  # time in minute
+    MAX_SIZE = int(os.environ.get("MAX_SIZE", 1900000000))
     # EDIT_TIME = int(os.environ.get("EDIT_TIME", 0))

@@ -4,6 +4,7 @@ from pyrogram.types import InlineKeyboardButton
 
 import youtube_dl
 from ytdlbot import LOGGER
+from ytdlbot.config import Config
 from ytdlbot.helper_utils.util import humanbytes
 
 
@@ -44,30 +45,31 @@ def extractYt(yturl):
 
 # The codes below were referenced after
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
+# https://stackoverflow.com/questions/33836593
 async def yt_download(url, media_type, format_id, output):
-    ytdl_opts = {}
+    ytdl_opts = {
+        "outtmpl": f"{output}",
+        "noplaylist": True,
+        "max_filesize": Config.MAX_SIZE
+    }
     if media_type == "Audio":
-        ytdl_opts = {
+        ytdl_opts.update({
             "format": "bestaudio/best",
-            "outtmpl": f"{output}",
-            "noplaylist": True,
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": "mp3",
                 "preferredquality": f"{format_id}"
             }, {
-                    "key": "FFmpegMetadata"
-                }],
-        }
+                "key": "FFmpegMetadata"
+            }],
+        })
     elif media_type == "Video":
-        ytdl_opts = {
+        ytdl_opts.update({
             "format": f"{format_id}+bestaudio",
-            "outtmpl": f"{output}",
-            "noplaylist": True,
             "postprocessors": [{
                 "key": "FFmpegMetadata"
             }],
-        }
+        })
     with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
         ydl.download([url])
     return True
