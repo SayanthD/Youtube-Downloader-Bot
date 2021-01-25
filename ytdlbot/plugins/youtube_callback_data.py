@@ -14,7 +14,7 @@ from pyrogram.types import (
 
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
-from ytdlbot.helper_utils.ffmfunc import duration
+from ytdlbot.helper_utils.ffmfunc import get_duration
 from ytdlbot.helper_utils.ytdlfunc import yt_download
 
 
@@ -46,6 +46,7 @@ async def catch_youtube_fmtid(_, m):
 @Client.on_callback_query()
 async def catch_youtube_dldata(c, q):
     cb_data = q.data.strip()
+    caption = q.message.caption
     # Callback Data Assigning
     media_type, send_as, format_id, yturl = cb_data.split("|")
 
@@ -72,28 +73,27 @@ async def catch_youtube_dldata(c, q):
 
     loop = asyncio.get_event_loop()
 
+    duration = await get_duration(file_name)
     if send_as == "Audio":
-        dur = round(duration(file_name))
         med = InputMediaAudio(
             media=file_name,
-            duration=dur,
-            caption=os.path.basename(file_name),
+            duration=duration,
+            caption=caption,
             title=os.path.basename(file_name),
         )
 
     elif send_as == "Video":
-        dur = round(duration(file_name))
         med = InputMediaVideo(
             media=file_name,
-            duration=dur,
-            caption=os.path.basename(file_name),
+            duration=duration,
+            caption=caption,
             supports_streaming=True,
         )
 
     else:
         med = InputMediaDocument(
             media=file_name,
-            caption=os.path.basename(file_name),
+            caption=caption,
         )
 
     if med:

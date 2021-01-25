@@ -1,13 +1,13 @@
-import subprocess as sp
+import subprocess
 import json
 
 
-def probe(vid_file_path):
+async def get_duration(vid_file_path):
     """
-    Give a json from ffprobe command line
+    Video's duration in seconds, return a float number
     @vid_file_path : The absolute (full) path of the video file, string.
     """
-    if type(vid_file_path) != str:
+    if not isinstance(vid_file_path, str):
         raise Exception('Give ffprobe a full file path of the file')
 
     command = ["ffprobe",
@@ -18,25 +18,19 @@ def probe(vid_file_path):
                vid_file_path
                ]
 
-    pipe = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT)
-    out, err = pipe.communicate()
-    return json.loads(out)
+    output, _ = await run_popen(command)
+    json_output = json.loads(output)
+
+    duration = 0
+    format_info = json_output.get("format")
+    if format_info and "duration" in format_info:
+        duration = round(float(format_info["duration"]))
+    return duration
 
 
-def duration(vid_file_path):
-    """
-    Video's duration in seconds, return a float number
-    """
-    _json = probe(vid_file_path)
-
-    if 'format' in _json:
-        if 'duration' in _json['format']:
-            return float(_json['format']['duration'])
-
-    if 'streams' in _json:
-        # commonly stream 0 is the video
-        for s in _json['streams']:
-            if 'duration' in s:
-                return float(s['duration'])
-
-    raise Exception('duration Not found')
+async def run_popen(command):
+    process = subprocess.Popen(
+        args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    stdout, stderr = process.communicate()
+    return stdout, stderr
