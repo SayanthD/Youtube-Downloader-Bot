@@ -8,47 +8,31 @@ from ytdlbot.config import Config
 from ytdlbot.helper_utils.util import humanbytes
 
 
-def create_buttons(quailitylist):
-    def buttonmap(item):
-        if item["format"]:
-            media_type = "Audio" if "audio" in item["format"] else "Video"
-            return [
-                InlineKeyboardButton(
-                    f"{item['format']} {humanbytes(item['filesize'])}",
-                    callback_data=f"ytdata|{media_type}|{item['format_id']}|{item['yturl']}"
-                )
-            ]
-    # Return a array of Buttons
-    return map(buttonmap, quailitylist)
-
-
 # extract Youtube info
-def extractYt(yturl):
-    ydl = youtube_dl.YoutubeDL()
-    with ydl:
-        qualityList = []
-        r = ydl.extract_info(yturl, download=False)
-        for format in r["formats"]:
+async def extract_formats(yturl):
+    with youtube_dl.YoutubeDL() as ydl:
+        buttons = []
+        info = ydl.extract_info(yturl, download=False, ie_key="Youtube")
+        for listed in info.get("formats"):
+            media_type = "Audio" if "audio" in listed.get("format") else "Video"
             # Filter dash video(without audio)
-            if "dash" not in str(format["format"]).lower():
-                qualityList.append(
-                    {
-                        "format": format["format"],
-                        "filesize": format["filesize"],
-                        "format_id": format["format_id"],
-                        "yturl": yturl,
-                    }
-                )
+            if "dash" not in str(listed.get("format")).lower():
+                buttons.append([
+                    InlineKeyboardButton(
+                        f"{media_type} {listed['format_note']} {humanbytes(listed['filesize'])} [{listed['ext']}]",
+                        callback_data=f"ytdata|{media_type}|{listed['format_id']}|{yturl}"
+                    )
+                ])
 
-        return r["title"], r["thumbnail"], qualityList
+    return info.get("title"), info.get("thumbnail"), buttons
 
 
 # The codes below were referenced after
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
 # https://stackoverflow.com/questions/33836593
-async def yt_download(url, media_type, format_id, output):
+async def yt_download(yturl, media_type, format_id, output):
     ytdl_opts = {
-        "outtmpl": f"{output}",
+        "outtmpl": output,
         "noplaylist": True,
         "max_filesize": Config.MAX_SIZE
     }
@@ -58,7 +42,7 @@ async def yt_download(url, media_type, format_id, output):
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": "mp3",
-                "preferredquality": f"{format_id}"
+                "preferredquality": format_id
             }, {
                 "key": "FFmpegMetadata"
             }],
@@ -70,6 +54,6 @@ async def yt_download(url, media_type, format_id, output):
                 "key": "FFmpegMetadata"
             }],
         })
-    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
-        ydl.download([url])
+    with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
+        ytdl.download([yturl])
     return True

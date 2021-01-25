@@ -5,7 +5,7 @@ from pyrogram.types import InlineKeyboardMarkup
 
 from ytdlbot.config import Config
 from ytdlbot import user_time
-from ytdlbot.helper_utils.ytdlfunc import extractYt, create_buttons
+from ytdlbot.helper_utils.ytdlfunc import extract_formats
 
 ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
 
@@ -21,7 +21,7 @@ async def ytdl(_, message):
     url = message.text.strip()
     await message.reply_chat_action("typing")
     try:
-        title, thumbnail_url, formats = extractYt(url)
+        title, thumbnail_url, buttons = await extract_formats(url)
 
         now = datetime.now()
         user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
@@ -29,17 +29,16 @@ async def ytdl(_, message):
     except Exception:
         await message.reply_text("`Failed To Fetch Youtube Data... 😔 \nPossible Youtube Blocked server ip \n#error`")
         return
-    buttons = InlineKeyboardMarkup(list(create_buttons(formats)))
     sentm = await message.reply_text("Processing Youtube Url 🔎 🔎 🔎")
     try:
         # Todo add webp image support in thumbnail by default not supported by pyrogram
         # https://www.youtube.com/watch?v=lTTajzrSkCw
-        await message.reply_photo(thumbnail_url, caption=title, reply_markup=buttons)
+        await message.reply_photo(thumbnail_url, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
         await sentm.delete()
     except Exception:
         try:
             thumbnail_url = "https://telegra.ph/file/ce37f8203e1903feed544.png"
-            await message.reply_photo(thumbnail_url, caption=title, reply_markup=buttons)
+            await message.reply_photo(thumbnail_url, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
             await sentm.delete()
         except Exception as e:
             await sentm.edit(f"<code>{e}</code> #Error")
