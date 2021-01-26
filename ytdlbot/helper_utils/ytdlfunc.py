@@ -15,11 +15,13 @@ async def extract_formats(yturl):
         info = ydl.extract_info(yturl, download=False, ie_key="Youtube")
         for listed in info.get("formats"):
             media_type = "Audio" if "audio" in listed.get("format") else "Video"
+            # SpEcHiDe/AnyDLBot/anydlbot/plugins/youtube_dl_echo.py#L112
+            filesize = humanbytes(listed.get("filesize")) if listed.get("filesize") else "(best)"
             # Filter dash video(without audio)
             if "dash" not in str(listed.get("format")).lower():
                 buttons.append([
                     InlineKeyboardButton(
-                        f"{media_type} {listed['format_note']} {humanbytes(listed['filesize'])} [{listed['ext']}]",
+                        f"{media_type} {listed['format_note']} [{listed['ext']}] {filesize}",
                         callback_data=f"ytdata|{media_type}|{listed['format_id']}|{yturl}"
                     )
                 ])
