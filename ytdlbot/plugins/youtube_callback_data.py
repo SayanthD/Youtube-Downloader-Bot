@@ -47,11 +47,12 @@ async def catch_youtube_fmtid(_, m):
 async def catch_youtube_dldata(c, q):
     cb_data = q.data.strip()
     caption = q.message.caption
+    message_id = q.message.reply_to_message.message_id
     # Callback Data Assigning
     media_type, send_as, format_id, yturl = cb_data.split("|")
 
     filext = "%(title)s.%(ext)s"
-    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(q.message.reply_to_message.message_id))
+    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(message_id))
 
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
@@ -67,9 +68,14 @@ async def catch_youtube_dldata(c, q):
     if fetch_media:
         file_directory = os.listdir(os.path.dirname(filepath))
         for content in file_directory:
-            file_name = os.path.join(userdir, content)
+            if "thumbnail.jpg" not in content:
+                file_name = os.path.join(userdir, content)
 
     LOGGER.info(file_name)
+
+    thumb = os.path.join(userdir, "thumbnail.jpg")
+    if not os.path.isfile(thumb):
+        thumb = None
 
     loop = asyncio.get_event_loop()
 
@@ -77,6 +83,7 @@ async def catch_youtube_dldata(c, q):
     if send_as == "Audio":
         med = InputMediaAudio(
             media=file_name,
+            thumb=thumb,
             duration=duration,
             caption=caption,
             title=os.path.basename(file_name),
@@ -85,6 +92,7 @@ async def catch_youtube_dldata(c, q):
     elif send_as == "Video":
         med = InputMediaVideo(
             media=file_name,
+            thumb=thumb,
             duration=duration,
             caption=caption,
             supports_streaming=True,
@@ -93,6 +101,7 @@ async def catch_youtube_dldata(c, q):
     else:
         med = InputMediaDocument(
             media=file_name,
+            thumb=thumb,
             caption=caption,
         )
 
