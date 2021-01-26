@@ -30,17 +30,14 @@ async def ytdl(_, message):
     except Exception:
         await message.reply_text("`Failed To Fetch Youtube Data... 😔 \nPossible Youtube Blocked server ip \n#error`")
         return
+
     status = await message.reply_text("Fetching thumbnail...")
+    if Config.CUSTOM_THUMB:
+        await status.edit_text("Found Custom thumbnail, Gotta pull it now.")
+        thumbnail_url = Config.CUSTOM_THUMB
     thumbnail = await fetch_thumb(thumbnail_url, status.reply_to_message.message_id)
     try:
-        # Todo add webp image support in thumbnail by default not supported by pyrogram
-        # https://www.youtube.com/watch?v=lTTajzrSkCw
         await message.reply_photo(thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
         await status.delete()
-    except Exception:
-        try:
-            thumbnail_url = "https://telegra.ph/file/ce37f8203e1903feed544.png"
-            await message.reply_photo(thumbnail_url, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
-            await status.delete()
-        except Exception as e:
-            await status.edit(f"<code>{e}</code> #Error")
+    except Exception as e:
+        await status.edit(f"<code>{e}</code> #Error")
