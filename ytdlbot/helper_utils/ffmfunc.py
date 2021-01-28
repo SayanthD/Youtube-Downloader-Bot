@@ -1,6 +1,5 @@
 import os
 import subprocess
-import json
 
 from ytdlbot.config import Config
 
@@ -13,22 +12,16 @@ async def get_duration(vid_file_path):
     if not isinstance(vid_file_path, str):
         raise Exception('Give ffprobe a full file path of the file')
 
+    # https://trac.ffmpeg.org/wiki/FFprobeTips
     command = ["ffprobe",
-               "-loglevel", "quiet",
-               "-print_format", "json",
-               "-show_format",
-               "-show_streams",
+               "-v", "error",
+               "-show_entries", "format=duration",
+               "-of", "default=noprint_wrappers=1:nokey=1",
                vid_file_path
                ]
 
     output, _ = await run_popen(command)
-    json_output = json.loads(output)
-
-    duration = 0
-    format_info = json_output.get("format")
-    if format_info and "duration" in format_info:
-        duration = round(float(format_info["duration"]))
-    return duration
+    return round(float(output)) if output else 0
 
 
 async def fetch_thumb(thumbnail_url, message_id):
@@ -36,6 +29,8 @@ async def fetch_thumb(thumbnail_url, message_id):
     if not os.path.exists(down_dir):
         os.makedirs(down_dir)
     thumb_path = os.path.join(down_dir, "thumbnail.jpg")
+
+    # https://unix.stackexchange.com/a/349116
     await run_popen(["ffmpeg", "-i", thumbnail_url, thumb_path])
     return thumb_path
 
