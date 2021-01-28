@@ -36,13 +36,7 @@ async def fetch_thumb(thumbnail_url, message_id):
     if not os.path.exists(down_dir):
         os.makedirs(down_dir)
     thumb_path = os.path.join(down_dir, "thumbnail.jpg")
-    command = ["ffmpeg",
-               "-y",
-               "-i", thumbnail_url,
-               "-vf", "scale=320:-1",
-               thumb_path
-               ]
-    output, _ = await run_popen(command)
+    await run_popen(["ffmpeg", "-i", thumbnail_url, thumb_path])
     return thumb_path
 
 
