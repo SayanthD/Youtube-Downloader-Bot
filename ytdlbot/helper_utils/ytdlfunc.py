@@ -22,19 +22,22 @@ async def extract_formats(yturl):
                 buttons.append([
                     InlineKeyboardButton(
                         f"{media_type} {listed['format_note']} [{listed['ext']}] {filesize}",
-                        callback_data=f"ytdata|{media_type}|{listed['format_id']}|{yturl}"
+                        callback_data=f"ytdata|{media_type}|{listed['format_id']}|{info['id']}"
                     )
                 ])
 
-    return info.get("title"), info.get("thumbnail"), buttons
+    return info.get("id"), info.get("title"), info.get("thumbnail"), buttons
 
 
 # The codes below were referenced after
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
 # https://stackoverflow.com/questions/33836593
-async def yt_download(yturl, media_type, format_id, output):
+async def yt_download(video_id, media_type, format_id, output):
     ytdl_opts = {
         "outtmpl": output,
+        "ignoreerrors": True,
+        "nooverwrites": True,
+        "continuedl": True,
         "noplaylist": True,
         "max_filesize": Config.MAX_SIZE
     }
@@ -57,5 +60,5 @@ async def yt_download(yturl, media_type, format_id, output):
             }],
         })
     with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
-        ytdl.download([yturl])
+        ytdl.download([video_id])
     return True

@@ -24,14 +24,14 @@ async def get_duration(vid_file_path):
     return round(float(output)) if output else 0
 
 
-async def fetch_thumb(thumbnail_url, message_id):
-    down_dir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(message_id))
+async def fetch_thumb(thumbnail_url, video_id):
+    down_dir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, video_id)
     if not os.path.exists(down_dir):
         os.makedirs(down_dir)
-    thumb_path = os.path.join(down_dir, "thumbnail.jpg")
+    thumb_path = os.path.join(down_dir, video_id + ".jpg")
 
     # https://unix.stackexchange.com/a/349116
-    await run_popen(["ffmpeg", "-i", thumbnail_url, thumb_path])
+    await run_popen(["ffmpeg", "-n", "-i", thumbnail_url, thumb_path])
     return thumb_path
 
 

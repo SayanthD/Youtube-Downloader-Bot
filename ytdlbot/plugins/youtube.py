@@ -22,7 +22,7 @@ async def ytdl(_, message):
     url = message.text.strip()
     await message.reply_chat_action("typing")
     try:
-        title, thumbnail_url, buttons = await extract_formats(url)
+        video_id, title, thumbnail_url, buttons = await extract_formats(url)
 
         now = datetime.now()
         user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
@@ -31,11 +31,11 @@ async def ytdl(_, message):
         await message.reply_text("`Failed To Fetch Youtube Data... 😔 \nPossible Youtube Blocked server ip \n#error`")
         return
 
-    status = await message.reply_text("Fetching thumbnail...")
+    status = await message.reply_text("Fetching thumbnail...", quote=True)
     if Config.CUSTOM_THUMB:
         await status.edit_text("Found Custom thumbnail, Gotta pull it now.")
         thumbnail_url = Config.CUSTOM_THUMB
-    thumbnail = await fetch_thumb(thumbnail_url, status.reply_to_message.message_id)
+    thumbnail = await fetch_thumb(thumbnail_url, video_id)
     try:
         await message.reply_photo(thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
         await status.delete()
