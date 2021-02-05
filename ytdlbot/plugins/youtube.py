@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup
+import youtube_dl
 
 from ytdlbot.config import Config
 from ytdlbot import user_time
@@ -27,8 +28,8 @@ async def ytdl(_, message):
         now = datetime.now()
         user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
 
-    except Exception:
-        await message.reply_text("`Failed To Fetch Youtube Data... 😔 \nPossible Youtube Blocked server ip \n#error`")
+    except youtube_dl.utils.DownloadError as error:
+        await message.reply_text(f"<b>{error}</b>", quote=True)
         return
 
     status = await message.reply_text("Fetching thumbnail...", quote=True)
