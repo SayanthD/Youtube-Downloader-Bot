@@ -1,11 +1,7 @@
-def humanbytes(num, suffix='B'):
-    if num is None:
-        num = 0
-    else:
-        num = int(num)
-
-    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
-        if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+def humanbytes(size):
+    # https://stackoverflow.com/a/43690506
+    for unit in ["B", "KiB", "MiB", "GiB", "TiB", "PiB"]:
+        if size < 1024.0 or unit == "PiB":
+            break
+        size /= 1024.0
+    return f"{size:.2f} {unit}"
