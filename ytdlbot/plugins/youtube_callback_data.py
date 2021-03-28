@@ -63,7 +63,7 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    fetch_media = await yt_download(video_id, media_type, format_id, filepath)
+    fetch_media = yt_download(video_id, media_type, format_id, filepath)
     if fetch_media:
         file_directory = os.listdir(os.path.dirname(filepath))
         for content in file_directory:

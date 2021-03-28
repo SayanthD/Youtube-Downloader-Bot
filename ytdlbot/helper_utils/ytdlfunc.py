@@ -9,7 +9,7 @@ from ytdlbot.helper_utils.util import humanbytes
 
 
 # extract Youtube info
-async def extract_formats(yturl):
+def extract_formats(yturl):
     with youtube_dl.YoutubeDL() as ydl:
         buttons = []
         info = ydl.extract_info(yturl, download=False, ie_key="Youtube")
@@ -32,7 +32,7 @@ async def extract_formats(yturl):
 # The codes below were referenced after
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
 # https://stackoverflow.com/questions/33836593
-async def yt_download(video_id, media_type, format_id, output):
+def yt_download(video_id, media_type, format_id, output):
     ytdl_opts = {
         "outtmpl": output,
         "ignoreerrors": True,
