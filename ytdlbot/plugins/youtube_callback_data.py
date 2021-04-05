@@ -29,10 +29,12 @@ async def catch_youtube_fmtid(_, m):
                 [
                     [
                         InlineKeyboardButton(
-                            f"{media_type}", callback_data=f"{media_type}|{media_type}|{format_id}|{video_id}"
+                            f"{media_type}",
+                            callback_data=f"{media_type}|{media_type}|{format_id}|{video_id}",
                         ),
                         InlineKeyboardButton(
-                            "Document", callback_data=f"{media_type}|Document|{format_id}|{video_id}"
+                            "Document",
+                            callback_data=f"{media_type}|Document|{format_id}|{video_id}",
                         ),
                     ]
                 ]

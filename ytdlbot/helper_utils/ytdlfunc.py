@@ -16,15 +16,21 @@ def extract_formats(yturl):
         for listed in info.get("formats"):
             media_type = "Audio" if "audio" in listed.get("format") else "Video"
             # SpEcHiDe/AnyDLBot/anydlbot/plugins/youtube_dl_echo.py#L112
-            filesize = humanbytes(listed.get("filesize")) if listed.get("filesize") else "(best)"
+            filesize = (
+                humanbytes(listed.get("filesize"))
+                if listed.get("filesize")
+                else "(best)"
+            )
             # Filter dash video(without audio)
             if "dash" not in str(listed.get("format")).lower():
-                buttons.append([
-                    InlineKeyboardButton(
-                        f"{media_type} {listed['format_note']} [{listed['ext']}] {filesize}",
-                        callback_data=f"ytdata|{media_type}|{listed['format_id']}|{info['id']}"
-                    )
-                ])
+                buttons.append(
+                    [
+                        InlineKeyboardButton(
+                            f"{media_type} {listed['format_note']} [{listed['ext']}] {filesize}",
+                            callback_data=f"ytdata|{media_type}|{listed['format_id']}|{info['id']}",
+                        )
+                    ]
+                )
 
     return info.get("id"), info.get("title"), info.get("thumbnail"), buttons
 
@@ -39,26 +45,29 @@ def yt_download(video_id, media_type, format_id, output):
         "nooverwrites": True,
         "continuedl": True,
         "noplaylist": True,
-        "max_filesize": Config.MAX_SIZE
+        "max_filesize": Config.MAX_SIZE,
     }
     if media_type == "Audio":
-        ytdl_opts.update({
-            "format": "bestaudio/best",
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-                "preferredquality": format_id
-            }, {
-                "key": "FFmpegMetadata"
-            }],
-        })
+        ytdl_opts.update(
+            {
+                "format": "bestaudio/best",
+                "postprocessors": [
+                    {
+                        "key": "FFmpegExtractAudio",
+                        "preferredcodec": "mp3",
+                        "preferredquality": format_id,
+                    },
+                    {"key": "FFmpegMetadata"},
+                ],
+            }
+        )
     elif media_type == "Video":
-        ytdl_opts.update({
-            "format": f"{format_id}+bestaudio",
-            "postprocessors": [{
-                "key": "FFmpegMetadata"
-            }],
-        })
+        ytdl_opts.update(
+            {
+                "format": f"{format_id}+bestaudio",
+                "postprocessors": [{"key": "FFmpegMetadata"}],
+            }
+        )
     with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
         ytdl.download([video_id])
     return True

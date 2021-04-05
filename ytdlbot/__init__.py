@@ -4,8 +4,7 @@ import logging
 
 # the logging things
 logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 logging.getLogger("pyrogram").setLevel(logging.WARNING)

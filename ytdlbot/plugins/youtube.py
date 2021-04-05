@@ -16,7 +16,9 @@ ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[
 async def ytdl(_, message):
     userLastDownloadTime = user_time.get(message.chat.id)
     if userLastDownloadTime and userLastDownloadTime > datetime.now():
-        wait_time = round((userLastDownloadTime - datetime.now()).total_seconds() / 60, 2)
+        wait_time = round(
+            (userLastDownloadTime - datetime.now()).total_seconds() / 60, 2
+        )
         await message.reply_text(f"`Wait {wait_time} Minutes before next Request`")
         return
 
@@ -38,7 +40,9 @@ async def ytdl(_, message):
         thumbnail_url = Config.CUSTOM_THUMB
     thumbnail = await fetch_thumb(thumbnail_url, video_id)
     try:
-        await message.reply_photo(thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply_photo(
+            thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons)
+        )
         await status.delete()
     except Exception as e:
         await status.edit(f"<code>{e}</code> #Error")
