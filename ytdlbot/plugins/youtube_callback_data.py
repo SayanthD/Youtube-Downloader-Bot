@@ -107,12 +107,12 @@ async def catch_youtube_dldata(c, q):
         )
 
     if med:
-        loop.create_task(send_file(c, q, med, userdir))
+        loop.create_task(send_file(c, q, med, video_id, userdir))
     else:
         LOGGER.info("Media not found")
 
 
-async def send_file(c, q, med, userdir):
+async def send_file(c, q, med, id, userdir):
     LOGGER.info(med)
     try:
         await q.edit_message_reply_markup(
@@ -122,7 +122,19 @@ async def send_file(c, q, med, userdir):
         )
         await c.send_chat_action(chat_id=q.message.chat.id, action="upload_document")
         # this one is not working
-        await q.edit_message_media(media=med)
+        await q.edit_message_media(
+            media=med,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            "Watch in YouTube",
+                            url=f"https://www.youtube.com/watch?v={id}",
+                        )
+                    ]
+                ]
+            ),
+        )
     except Exception as e:
         LOGGER.info(e)
         await q.edit_message_text(e)
