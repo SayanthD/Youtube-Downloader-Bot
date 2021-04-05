@@ -25,7 +25,7 @@ async def ytdl(_, message):
     url = message.text.strip()
     await message.reply_chat_action("typing")
     try:
-        video_id, title, thumbnail_url, buttons = extract_formats(url)
+        video_id, title, thumbnail_url, buttons = await extract_formats(url)
 
         now = datetime.now()
         user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
