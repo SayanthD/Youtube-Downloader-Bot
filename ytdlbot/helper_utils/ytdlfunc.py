@@ -1,4 +1,7 @@
 from __future__ import unicode_literals
+import asyncio
+import functools
+from concurrent.futures import ThreadPoolExecutor
 
 from pyrogram.types import InlineKeyboardButton
 
@@ -8,7 +11,19 @@ from ytdlbot.config import Config
 from ytdlbot.helper_utils.util import humanbytes
 
 
+# https://stackoverflow.com/a/64506715
+def run_in_executor(_func):
+    @functools.wraps(_func)
+    async def wrapped(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        func = functools.partial(_func, *args, **kwargs)
+        return await loop.run_in_executor(executor=ThreadPoolExecutor(), func=func)
+
+    return wrapped
+
+
 # extract Youtube info
+@run_in_executor
 def extract_formats(yturl):
     with youtube_dl.YoutubeDL() as ydl:
         buttons = []
@@ -38,6 +53,7 @@ def extract_formats(yturl):
 # The codes below were referenced after
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
 # https://stackoverflow.com/questions/33836593
+@run_in_executor
 def yt_download(video_id, media_type, format_id, output):
     ytdl_opts = {
         "outtmpl": output,
