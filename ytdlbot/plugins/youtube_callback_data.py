@@ -68,8 +68,7 @@ async def catch_youtube_dldata(c, q):
 
     fetch_media = await yt_download(video_id, media_type, format_id, filepath)
     if fetch_media:
-        file_directory = os.listdir(os.path.dirname(filepath))
-        for content in file_directory:
+        for content in os.listdir(userdir):
             if ".jpg" not in content:
                 file_name = os.path.join(userdir, content)
 
