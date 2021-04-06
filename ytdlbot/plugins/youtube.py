@@ -14,7 +14,8 @@ ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[
 
 @Client.on_message(filters.regex(ytregex))
 async def ytdl(_, message):
-    userLastDownloadTime = user_time.get(message.chat.id)
+    user_id = message.from_user.id
+    userLastDownloadTime = user_time.get(user_id)
     if userLastDownloadTime and userLastDownloadTime > datetime.now():
         wait_time = round(
             (userLastDownloadTime - datetime.now()).total_seconds() / 60, 2
@@ -28,7 +29,7 @@ async def ytdl(_, message):
         video_id, title, thumbnail_url, buttons = await extract_formats(url)
 
         now = datetime.now()
-        user_time[message.chat.id] = now + timedelta(minutes=Config.TIMEOUT)
+        user_time[user_id] = now + timedelta(minutes=Config.TIMEOUT)
 
     except youtube_dl.utils.DownloadError as error:
         await message.reply_text(f"<b>{error}</b>", quote=True)
