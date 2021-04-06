@@ -39,7 +39,7 @@ async def ytdl(_, message):
     if Config.CUSTOM_THUMB:
         await status.edit_text("Found Custom thumbnail, Gotta pull it now.")
         thumbnail_url = Config.CUSTOM_THUMB
-    thumbnail = await fetch_thumb(thumbnail_url, video_id)
+    thumbnail = await fetch_thumb(user_id, thumbnail_url, video_id)
     try:
         await message.reply_photo(
             thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons)

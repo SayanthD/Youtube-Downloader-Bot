@@ -49,11 +49,12 @@ async def catch_youtube_fmtid(_, m):
 async def catch_youtube_dldata(c, q):
     cb_data = q.data.strip()
     caption = q.message.caption
+    user_id = q.from_user.id
     # Callback Data Assigning
     media_type, send_as, format_id, video_id = cb_data.split("|")
 
     filext = "%(title)s.%(ext)s"
-    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, video_id)
+    userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(user_id), video_id)
 
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
