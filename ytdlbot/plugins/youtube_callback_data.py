@@ -22,7 +22,7 @@ from ytdlbot.helper_utils.ytdlfunc import yt_download
 async def catch_youtube_fmtid(_, m):
     cb_data = m.data
     if cb_data.startswith("ytdata"):
-        _, media_type, format_id, acodec, video_id = cb_data.split("|")
+        _, media_type, format_id, av_codec, video_id = cb_data.split("|")
         LOGGER.info(cb_data)
         if media_type:
             buttons = InlineKeyboardMarkup(
@@ -30,11 +30,11 @@ async def catch_youtube_fmtid(_, m):
                     [
                         InlineKeyboardButton(
                             f"{media_type}",
-                            callback_data=f"{media_type}|{media_type}|{format_id}|{acodec}|{video_id}",
+                            callback_data=f"{media_type}|{media_type}|{format_id}|{av_codec}|{video_id}",
                         ),
                         InlineKeyboardButton(
                             "Document",
-                            callback_data=f"{media_type}|Document|{format_id}|{acodec}|{video_id}",
+                            callback_data=f"{media_type}|Document|{format_id}|{av_codec}|{video_id}",
                         ),
                     ]
                 ]
@@ -51,7 +51,7 @@ async def catch_youtube_dldata(c, q):
     caption = q.message.caption
     user_id = q.from_user.id
     # Callback Data Assigning
-    media_type, send_as, format_id, acodec, video_id = cb_data.split("|")
+    media_type, send_as, format_id, av_codec, video_id = cb_data.split("|")
     LOGGER.info(cb_data)
 
     filext = "%(title)s.%(ext)s"
@@ -67,7 +67,7 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    fetch_media = await yt_download(video_id, media_type, acodec, format_id, filepath)
+    fetch_media = await yt_download(video_id, media_type, av_codec, format_id, filepath)
     if fetch_media:
         for content in os.listdir(userdir):
             if ".jpg" not in content:

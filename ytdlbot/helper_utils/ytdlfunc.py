@@ -36,14 +36,15 @@ def extract_formats(yturl):
                 if listed.get("filesize")
                 else "(best)"
             )
-            acodec = listed.get("acodec")
+            if listed.get("acodec") == "none" or listed.get("vcodec") == "none":
+                av_codec = "none"
             # Filter dash video(without audio)
             if "dash" not in str(listed.get("format")).lower():
                 buttons.append(
                     [
                         InlineKeyboardButton(
                             f"{media_type} {listed['format_note']} [{listed['ext']}] {filesize}",
-                            callback_data=f"ytdata|{media_type}|{listed['format_id']}|{acodec}|{info['id']}",
+                            callback_data=f"ytdata|{media_type}|{listed['format_id']}|{av_codec}|{info['id']}",
                         )
                     ]
                 )
@@ -55,7 +56,7 @@ def extract_formats(yturl):
 # https://github.com/eyaadh/megadlbot_oss/blob/master/mega/helpers/ytdl.py
 # https://stackoverflow.com/questions/33836593
 @run_in_executor
-def yt_download(video_id, media_type, acodec, format_id, output):
+def yt_download(video_id, media_type, av_codec, format_id, output):
     ytdl_opts = {
         "outtmpl": output,
         "ignoreerrors": True,
@@ -80,7 +81,7 @@ def yt_download(video_id, media_type, acodec, format_id, output):
         )
     elif media_type == "Video":
         # Special condition, refer 20b0ef4
-        if acodec == "none":
+        if av_codec == "none":
             format_id = f"{format_id}+bestaudio"
         ytdl_opts.update(
             {
