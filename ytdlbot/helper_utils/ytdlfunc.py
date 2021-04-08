@@ -85,5 +85,7 @@ def yt_download(video_id, media_type, format_id, output):
             }
         )
     with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
+        # Fixing extractor info to 'YouTube'
+        ytdl._ies = [ytdl.get_info_extractor("Youtube")]
         ytdl.download([video_id])
     return True
