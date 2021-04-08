@@ -22,19 +22,19 @@ from ytdlbot.helper_utils.ytdlfunc import yt_download
 async def catch_youtube_fmtid(_, m):
     cb_data = m.data
     if cb_data.startswith("ytdata"):
-        _, media_type, format_id, video_id = cb_data.split("|")
-        LOGGER.info(media_type)
+        _, media_type, format_id, acodec, video_id = cb_data.split("|")
+        LOGGER.info(cb_data)
         if media_type:
             buttons = InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
                             f"{media_type}",
-                            callback_data=f"{media_type}|{media_type}|{format_id}|{video_id}",
+                            callback_data=f"{media_type}|{media_type}|{format_id}|{acodec}|{video_id}",
                         ),
                         InlineKeyboardButton(
                             "Document",
-                            callback_data=f"{media_type}|Document|{format_id}|{video_id}",
+                            callback_data=f"{media_type}|Document|{format_id}|{acodec}|{video_id}",
                         ),
                     ]
                 ]
@@ -47,11 +47,12 @@ async def catch_youtube_fmtid(_, m):
 
 @Client.on_callback_query()
 async def catch_youtube_dldata(c, q):
-    cb_data = q.data.strip()
+    cb_data = q.data
     caption = q.message.caption
     user_id = q.from_user.id
     # Callback Data Assigning
-    media_type, send_as, format_id, video_id = cb_data.split("|")
+    media_type, send_as, format_id, acodec, video_id = cb_data.split("|")
+    LOGGER.info(cb_data)
 
     filext = "%(title)s.%(ext)s"
     userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(user_id), video_id)
@@ -66,7 +67,7 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    fetch_media = await yt_download(video_id, media_type, format_id, filepath)
+    fetch_media = await yt_download(video_id, media_type, acodec, format_id, filepath)
     if fetch_media:
         for content in os.listdir(userdir):
             if ".jpg" not in content:
