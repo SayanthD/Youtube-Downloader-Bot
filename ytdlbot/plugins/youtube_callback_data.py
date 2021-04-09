@@ -16,6 +16,7 @@ from ytdlbot import LOGGER
 from ytdlbot.config import Config
 from ytdlbot.helper_utils.ffmfunc import get_duration
 from ytdlbot.helper_utils.ytdlfunc import yt_download
+from ytdlbot.helper_utils.util import width_and_height
 
 
 @Client.on_callback_query()
@@ -76,16 +77,14 @@ async def catch_youtube_dldata(c, q):
     LOGGER.info(file_name)
 
     thumb = os.path.join(userdir, video_id + ".jpg")
-    if not os.path.isfile(thumb):
-        thumb = None
-
-    loop = asyncio.get_event_loop()
+    if os.path.isfile(thumb):
+        width, height = width_and_height(thumb)
 
     duration = await get_duration(file_name)
     if send_as == "Audio":
         med = InputMediaAudio(
             media=file_name,
-            thumb=thumb,
+            thumb=thumb or None,
             duration=duration,
             caption=caption,
             title=os.path.basename(file_name),
@@ -94,7 +93,9 @@ async def catch_youtube_dldata(c, q):
     elif send_as == "Video":
         med = InputMediaVideo(
             media=file_name,
-            thumb=thumb,
+            thumb=thumb or None,
+            width=width or 0,
+            height=height or 0,
             duration=duration,
             caption=caption,
             supports_streaming=True,
@@ -103,11 +104,12 @@ async def catch_youtube_dldata(c, q):
     else:
         med = InputMediaDocument(
             media=file_name,
-            thumb=thumb,
+            thumb=thumb or None,
             caption=caption,
         )
 
     if med:
+        loop = asyncio.get_event_loop()
         loop.create_task(send_file(c, q, med, video_id, userdir))
     else:
         LOGGER.info("Media not found")

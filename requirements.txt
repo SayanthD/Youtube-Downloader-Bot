@@ -1,3 +1,4 @@
 TgCrypto
 Pyrogram
 youtube_dl
+hachoir
