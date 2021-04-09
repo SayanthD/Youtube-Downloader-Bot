@@ -36,6 +36,7 @@ def extract_formats(yturl):
                 if listed.get("filesize")
                 else "(best)"
             )
+            av_codec = "empty"
             if listed.get("acodec") == "none" or listed.get("vcodec") == "none":
                 av_codec = "none"
             # Filter dash video(without audio)
