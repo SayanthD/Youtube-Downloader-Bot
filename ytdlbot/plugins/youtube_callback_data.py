@@ -69,22 +69,24 @@ async def catch_youtube_dldata(c, q):
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
     fetch_media = await yt_download(video_id, media_type, av_codec, format_id, filepath)
+    LOGGER.info(os.listdir(userdir))
     if fetch_media:
         for content in os.listdir(userdir):
             if ".jpg" not in content:
                 file_name = os.path.join(userdir, content)
 
-    LOGGER.info(file_name)
-
     thumb = os.path.join(userdir, video_id + ".jpg")
+    width = height = 0
     if os.path.isfile(thumb):
         width, height = width_and_height(thumb)
+    else:
+        thumb = None
 
     duration = await get_duration(file_name)
     if send_as == "Audio":
         med = InputMediaAudio(
             media=file_name,
-            thumb=thumb or None,
+            thumb=thumb,
             duration=duration,
             caption=caption,
             title=os.path.basename(file_name),
@@ -93,9 +95,9 @@ async def catch_youtube_dldata(c, q):
     elif send_as == "Video":
         med = InputMediaVideo(
             media=file_name,
-            thumb=thumb or None,
-            width=width or 0,
-            height=height or 0,
+            thumb=thumb,
+            width=width,
+            height=height,
             duration=duration,
             caption=caption,
             supports_streaming=True,
@@ -104,7 +106,7 @@ async def catch_youtube_dldata(c, q):
     else:
         med = InputMediaDocument(
             media=file_name,
-            thumb=thumb or None,
+            thumb=thumb,
             caption=caption,
         )
 
