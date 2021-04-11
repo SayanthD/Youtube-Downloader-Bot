@@ -11,15 +11,5 @@ async def fetch_thumb(user_id, thumbnail_url, video_id):
     thumb_path = os.path.join(down_dir, video_id + ".jpg")
 
     # https://unix.stackexchange.com/a/349116
-    await run_popen(["ffmpeg", "-n", "-i", thumbnail_url, thumb_path])
+    subprocess.Popen(args=["ffmpeg", "-n", "-i", thumbnail_url, thumb_path]).communicate()
     return thumb_path
-
-
-async def run_popen(command):
-    process = subprocess.Popen(
-        args=command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout, stderr = process.communicate()
-    return stdout, stderr
