@@ -49,7 +49,7 @@ async def catch_youtube_fmtid(_, m):
 @Client.on_callback_query()
 async def catch_youtube_dldata(c, q):
     cb_data = q.data
-    caption = q.message.caption
+    # caption = q.message.caption
     user_id = q.from_user.id
     # Callback Data Assigning
     media_type, send_as, format_id, av_codec, video_id = cb_data.split("|")
@@ -68,7 +68,7 @@ async def catch_youtube_dldata(c, q):
     filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
-    fetch_media = await yt_download(video_id, media_type, av_codec, format_id, filepath)
+    fetch_media, title = await yt_download(video_id, media_type, av_codec, format_id, filepath)
     LOGGER.info(os.listdir(userdir))
     if fetch_media:
         for content in os.listdir(userdir):
@@ -88,7 +88,7 @@ async def catch_youtube_dldata(c, q):
             media=file_name,
             thumb=thumb,
             duration=duration,
-            caption=caption,
+            caption=title,
             title=os.path.basename(file_name),
         )
 
@@ -99,7 +99,7 @@ async def catch_youtube_dldata(c, q):
             width=width,
             height=height,
             duration=duration,
-            caption=caption,
+            caption=title,
             supports_streaming=True,
         )
 
@@ -107,7 +107,7 @@ async def catch_youtube_dldata(c, q):
         med = InputMediaDocument(
             media=file_name,
             thumb=thumb,
-            caption=caption,
+            caption=title,
         )
 
     if med:
