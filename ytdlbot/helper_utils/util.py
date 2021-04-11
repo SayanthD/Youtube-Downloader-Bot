@@ -14,3 +14,8 @@ def humanbytes(size):
 def width_and_height(thumbnail_path):
     metadata = extractMetadata(createParser(thumbnail_path))
     return metadata.get("width"), metadata.get("height")
+
+
+def media_duration(media_path):
+    metadata = extractMetadata(createParser(media_path))
+    return metadata.get("duration").seconds
