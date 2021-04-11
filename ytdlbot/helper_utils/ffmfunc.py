@@ -11,5 +11,7 @@ async def fetch_thumb(user_id, thumbnail_url, video_id):
     thumb_path = os.path.join(down_dir, video_id + ".jpg")
 
     # https://unix.stackexchange.com/a/349116
-    subprocess.Popen(args=["ffmpeg", "-n", "-i", thumbnail_url, thumb_path]).communicate()
+    subprocess.Popen(
+        args=["ffmpeg", "-v", "quiet", "-n", "-i", thumbnail_url, thumb_path]
+    ).communicate()
     return thumb_path
