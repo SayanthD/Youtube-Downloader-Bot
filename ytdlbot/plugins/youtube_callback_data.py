@@ -14,9 +14,8 @@ from pyrogram.types import (
 
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
-from ytdlbot.helper_utils.ffmfunc import get_duration
 from ytdlbot.helper_utils.ytdlfunc import yt_download
-from ytdlbot.helper_utils.util import width_and_height
+from ytdlbot.helper_utils.util import width_and_height, media_duration
 
 
 @Client.on_callback_query()
@@ -82,7 +81,7 @@ async def catch_youtube_dldata(c, q):
     else:
         thumb = None
 
-    duration = await get_duration(file_name)
+    duration = media_duration(file_name)
     if send_as == "Audio":
         med = InputMediaAudio(
             media=file_name,
