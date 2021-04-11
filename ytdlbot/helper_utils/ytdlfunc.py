@@ -32,9 +32,7 @@ def extract_formats(yturl):
             media_type = "Audio" if "audio" in listed.get("format") else "Video"
             # SpEcHiDe/AnyDLBot/anydlbot/plugins/youtube_dl_echo.py#L112
             filesize = (
-                humanbytes(listed.get("filesize"))
-                if listed.get("filesize")
-                else "(best)"
+                humanbytes(listed.get("filesize")) if listed.get("filesize") else ""
             )
             av_codec = "empty"
             if listed.get("acodec") == "none" or listed.get("vcodec") == "none":
