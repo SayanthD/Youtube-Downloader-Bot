@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from pyrogram.types import InlineKeyboardButton
 
-import youtube_dl
+import yt_dlp
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
 from ytdlbot.helper_utils.util import humanbytes
@@ -25,7 +25,7 @@ def run_in_executor(_func):
 # extract Youtube info
 @run_in_executor
 def extract_formats(yturl):
-    with youtube_dl.YoutubeDL() as ydl:
+    with yt_dlp.YoutubeDL() as ydl:
         buttons = []
         info = ydl.extract_info(yturl, download=False, ie_key="Youtube")
         for listed in info.get("formats"):
@@ -91,7 +91,7 @@ def yt_download(video_id, media_type, av_codec, format_id, output):
             }
         )
     LOGGER.info(ytdl_opts)
-    with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
+    with yt_dlp.YoutubeDL(ytdl_opts) as ytdl:
         # Fixing extractor info to 'YouTube'
         ytdl._ies = [ytdl.get_info_extractor("Youtube")]
         ytdl.download([video_id])

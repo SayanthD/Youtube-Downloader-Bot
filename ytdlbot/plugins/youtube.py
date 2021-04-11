@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup
-import youtube_dl
+import yt_dlp
 
 from ytdlbot.config import Config
 from ytdlbot import user_time
@@ -31,7 +31,7 @@ async def ytdl(_, message):
         now = datetime.now()
         user_time[user_id] = now + timedelta(minutes=Config.TIMEOUT)
 
-    except youtube_dl.utils.DownloadError as error:
+    except yt_dlp.utils.DownloadError as error:
         await message.reply_text(f"<b>{error}</b>", quote=True)
         return
 
