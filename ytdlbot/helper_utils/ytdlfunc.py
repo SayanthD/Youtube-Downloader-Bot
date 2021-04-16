@@ -8,8 +8,7 @@ from pyrogram.types import InlineKeyboardButton
 import youtube_dl
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
-from ytdlbot.helper_utils.util import humanbytes
-
+from ytdlbot.helper_utils.util import humanbytes, time_formatter
 
 # https://stackoverflow.com/a/64506715
 def run_in_executor(_func):
@@ -26,6 +25,7 @@ def run_in_executor(_func):
 async def extract_formats(yturl):
     buttons = []
     info = await yt_extract_info(video_url=yturl, download=False, ytdl_opts={})
+    duration = time_formatter(info.get("duration"))
     for listed in info.get("formats"):
         media_type = "Audio" if "audio" in listed.get("format") else "Video"
         # SpEcHiDe/AnyDLBot/anydlbot/plugins/youtube_dl_echo.py#L112
@@ -46,7 +46,7 @@ async def extract_formats(yturl):
                 ]
             )
 
-    return info.get("id"), info.get("title"), info.get("thumbnail"), buttons
+    return info.get("id"), info.get("title"), info.get("thumbnail"), duration, buttons
 
 
 # The codes below were referenced after
