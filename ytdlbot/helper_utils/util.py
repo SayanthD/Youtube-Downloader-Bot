@@ -35,6 +35,9 @@ def time_formatter(seconds: int) -> str:
 
 
 def make_template(title, duration, upload_date):
+    # Thanks to Userge-X
+    # The template below was inspired after,
+    # https://github.com/code-rgb/USERGE-X/blob/alpha/userge/plugins/bot/utube_inline.py#L448-L474
     formatted_duration = time_formatter(duration)
     uploaded = datetime.strptime(upload_date, "%Y%m%d").strftime("%d %B %Y")
     template = (
