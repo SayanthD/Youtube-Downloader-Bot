@@ -1,5 +1,6 @@
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
+from datetime import datetime
 
 
 def humanbytes(size):
@@ -31,3 +32,14 @@ def time_formatter(seconds: int) -> str:
         if v_m != 0:
             result += f"{v_m} {age} "
     return result or "0 seconds"
+
+
+def make_template(title, duration, upload_date):
+    formatted_duration = time_formatter(duration)
+    uploaded = datetime.strptime(upload_date, "%Y%m%d").strftime("%d %B %Y")
+    template = (
+        f"<b>Title:</b> {title}\n\n"
+        f"<b>Duration:</b> {formatted_duration}\n"
+        f"<b>Uploaded on</b> {uploaded}"
+    )
+    return template
