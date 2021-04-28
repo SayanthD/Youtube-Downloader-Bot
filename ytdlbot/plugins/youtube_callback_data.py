@@ -70,8 +70,13 @@ async def catch_youtube_dldata(c, q):
     fetch_media, caption = await yt_download(
         video_id, media_type, av_codec, format_id, filepath
     )
-    LOGGER.info(os.listdir(userdir))
-    if fetch_media:
+    if not fetch_media:
+        await q.message.reply_text(caption)
+        shutil.rmtree(userdir, ignore_errors=True)
+        await q.message.delete()
+        return
+    else:
+        LOGGER.info(os.listdir(userdir))
         for content in os.listdir(userdir):
             if ".jpg" not in content:
                 file_name = os.path.join(userdir, content)
