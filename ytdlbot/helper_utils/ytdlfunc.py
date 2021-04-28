@@ -87,8 +87,13 @@ async def yt_download(video_id, media_type, av_codec, format_id, output):
             }
         )
     LOGGER.info(ytdl_opts)
-    if info := await yt_extract_info(video_url=video_id, download=True, ytdl_opts=ytdl_opts):
-        return True, info.get("title")
+    try:
+        info = await yt_extract_info(
+            video_url=video_id, download=True, ytdl_opts=ytdl_opts
+        )
+        return True, info.get("title", "")
+    except yt_dlp.utils.DownloadError as error_msg:
+        return False, error_msg
 
 
 @run_in_executor
