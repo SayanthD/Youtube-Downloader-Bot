@@ -119,34 +119,17 @@ async def catch_youtube_dldata(c, q):
 
     if med:
         loop = asyncio.get_event_loop()
-        loop.create_task(send_file(c, q, med, video_id, userdir))
+        loop.create_task(send_file(c, q, med, userdir))
     else:
         logger.info("Media not found")
 
 
-async def send_file(c, q, med, id, userdir):
+async def send_file(c, q, med, userdir):
     logger.info(med)
     try:
-        await q.edit_message_reply_markup(
-            InlineKeyboardMarkup(
-                [[InlineKeyboardButton("Uploading...", callback_data="down")]]
-            )
-        )
         await c.send_chat_action(chat_id=q.message.chat.id, action="upload_document")
         # this one is not working
-        await q.edit_message_media(
-            media=med,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(
-                            "Watch in YouTube",
-                            url=f"https://www.youtube.com/watch?v={id}",
-                        )
-                    ]
-                ]
-            ),
-        )
+        await q.edit_message_media(media=med)
     except Exception as e:
         logger.info(e)
         await q.edit_message_text(e)
