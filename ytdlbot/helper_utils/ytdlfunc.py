@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
+
 import asyncio
 import functools
 from concurrent.futures import ThreadPoolExecutor
 
 from pyrogram.types import InlineKeyboardButton
+from youtube_dl import YoutubeDL
+from youtube_dl.utils import DownloadError
 
-import youtube_dl
 from ytdlbot import LOGGER
 from ytdlbot.config import Config
 from ytdlbot.helper_utils.util import humanbytes, make_template
@@ -95,12 +97,12 @@ async def yt_download(video_id, media_type, av_codec, format_id, output):
             video_url=video_id, download=True, ytdl_opts=ytdl_opts
         )
         return True, info.get("title", "")
-    except youtube_dl.utils.DownloadError as error_msg:
+    except DownloadError as error_msg:
         return False, error_msg
 
 
 @run_in_executor
 def yt_extract_info(video_url, download, ytdl_opts):
-    with youtube_dl.YoutubeDL(ytdl_opts) as ytdl:
+    with YoutubeDL(ytdl_opts) as ytdl:
         info = ytdl.extract_info(video_url, download=download, ie_key="Youtube")
     return info

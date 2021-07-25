@@ -2,12 +2,12 @@ from datetime import datetime, timedelta
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup
-import youtube_dl
+from youtube_dl.utils import DownloadError, ExtractorError
 
-from ytdlbot.config import Config
 from ytdlbot import user_time
-from ytdlbot.helper_utils.ytdlfunc import extract_formats
+from ytdlbot.config import Config
 from ytdlbot.helper_utils.ffmfunc import fetch_thumb
+from ytdlbot.helper_utils.ytdlfunc import extract_formats
 
 ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
 
@@ -31,7 +31,7 @@ async def ytdl(_, message):
         now = datetime.now()
         user_time[user_id] = now + timedelta(minutes=Config.TIMEOUT)
 
-    except youtube_dl.utils.DownloadError as error:
+    except (DownloadError, ExtractorError) as error:
         await message.reply_text(f"<b>{error}</b>", quote=True)
         return
 
