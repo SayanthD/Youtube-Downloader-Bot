@@ -4,8 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup
 from youtube_dl.utils import DownloadError, ExtractorError
 
-from ytdlbot import user_time
-from ytdlbot.config import Config
+from ytdlbot import Config, user_time
 from ytdlbot.helper_utils.ffmfunc import fetch_thumb
 from ytdlbot.helper_utils.ytdlfunc import extract_formats
 

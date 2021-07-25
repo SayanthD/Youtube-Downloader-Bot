@@ -1,21 +1,22 @@
 import asyncio
+import logging
 import os
 import shutil
 
 from pyrogram import Client, ContinuePropagation
-
 from pyrogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    InputMediaVideo,
     InputMediaAudio,
     InputMediaDocument,
+    InputMediaVideo,
 )
 
-from ytdlbot import LOGGER
-from ytdlbot.config import Config
+from ytdlbot import Config
+from ytdlbot.helper_utils.util import media_duration, width_and_height
 from ytdlbot.helper_utils.ytdlfunc import yt_download
-from ytdlbot.helper_utils.util import width_and_height, media_duration
+
+logger = logging.getLogger(__name__)
 
 
 @Client.on_callback_query()
@@ -23,7 +24,7 @@ async def catch_youtube_fmtid(_, m):
     cb_data = m.data
     if cb_data.startswith("ytdata"):
         _, media_type, format_id, av_codec, video_id = cb_data.split("|")
-        LOGGER.info(cb_data)
+        logger.info(cb_data)
         if media_type:
             buttons = InlineKeyboardMarkup(
                 [
@@ -52,7 +53,7 @@ async def catch_youtube_dldata(c, q):
     user_id = q.from_user.id
     # Callback Data Assigning
     media_type, send_as, format_id, av_codec, video_id = cb_data.split("|")
-    LOGGER.info(cb_data)
+    logger.info(cb_data)
 
     filext = "%(title)s.%(ext)s"
     userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(user_id), video_id)
@@ -76,7 +77,7 @@ async def catch_youtube_dldata(c, q):
         await q.message.delete()
         return
     else:
-        LOGGER.info(os.listdir(userdir))
+        logger.info(os.listdir(userdir))
         for content in os.listdir(userdir):
             if ".jpg" not in content:
                 file_name = os.path.join(userdir, content)
@@ -120,11 +121,11 @@ async def catch_youtube_dldata(c, q):
         loop = asyncio.get_event_loop()
         loop.create_task(send_file(c, q, med, video_id, userdir))
     else:
-        LOGGER.info("Media not found")
+        logger.info("Media not found")
 
 
 async def send_file(c, q, med, id, userdir):
-    LOGGER.info(med)
+    logger.info(med)
     try:
         await q.edit_message_reply_markup(
             InlineKeyboardMarkup(
@@ -147,7 +148,7 @@ async def send_file(c, q, med, id, userdir):
             ),
         )
     except Exception as e:
-        LOGGER.info(e)
+        logger.info(e)
         await q.edit_message_text(e)
     finally:
         shutil.rmtree(userdir, ignore_errors=True)  # Cleanup

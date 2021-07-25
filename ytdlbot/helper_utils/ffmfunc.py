@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from ytdlbot.config import Config
+from ytdlbot import Config
 
 
 async def fetch_thumb(user_id, thumbnail_url, video_id):

@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
-from datetime import datetime
 
 
 def humanbytes(size):

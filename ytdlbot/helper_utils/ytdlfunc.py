@@ -2,16 +2,17 @@ from __future__ import unicode_literals
 
 import asyncio
 import functools
+import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from pyrogram.types import InlineKeyboardButton
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import DownloadError
 
-from ytdlbot import LOGGER
-from ytdlbot.config import Config
+from ytdlbot import Config
 from ytdlbot.helper_utils.util import humanbytes, make_template
 
+logger = logging.getLogger(__name__)
 
 # https://stackoverflow.com/a/64506715
 def run_in_executor(_func):
@@ -91,7 +92,7 @@ async def yt_download(video_id, media_type, av_codec, format_id, output):
                 "postprocessors": [{"key": "FFmpegMetadata"}],
             }
         )
-    LOGGER.info(ytdl_opts)
+    logger.info(ytdl_opts)
     try:
         info = await yt_extract_info(
             video_url=video_id, download=True, ytdl_opts=ytdl_opts
