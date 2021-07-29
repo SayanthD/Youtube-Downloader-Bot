@@ -14,6 +14,7 @@ from ytdlbot.helper_utils.util import humanbytes, make_template
 
 logger = logging.getLogger(__name__)
 
+
 # https://stackoverflow.com/a/64506715
 def run_in_executor(_func):
     @functools.wraps(_func)
@@ -28,13 +29,17 @@ def run_in_executor(_func):
 # extract Youtube info
 async def extract_formats(yturl):
     buttons = []
-    info = await yt_extract_info(video_url=yturl, download=False, ytdl_opts={})
+    info = await yt_extract_info(
+        video_url=yturl,
+        download=False,
+        ytdl_opts={"youtube_include_dash_manifest": False},
+    )
     template = make_template(
         info.get("title"), info.get("duration"), info.get("upload_date")
     )
     for listed in info.get("formats"):
         media_type = "Audio" if "audio" in listed.get("format") else "Video"
-        format_note = listed.get("format_note") or listed.get("format")
+        format_note = listed.get("format_note", "format")
         # SpEcHiDe/AnyDLBot/anydlbot/plugins/youtube_dl_echo.py#L112
         filesize = (
             humanbytes(listed.get("filesize")) if listed.get("filesize") else "(best)"
@@ -42,16 +47,14 @@ async def extract_formats(yturl):
         av_codec = "empty"
         if listed.get("acodec") == "none" or listed.get("vcodec") == "none":
             av_codec = "none"
-        # Filter dash video(without audio)
-        if "dash" not in str(listed.get("format")).lower():
-            buttons.append(
+        buttons.append(
                 [
                     InlineKeyboardButton(
                         f"{media_type} {format_note} [{listed['ext']}] {filesize}",
                         callback_data=f"{media_type}_{listed['format_id']}_{av_codec}_{info['id']}",
                     )
                 ]
-            )
+        )
 
     return info.get("id"), info.get("thumbnail"), template, buttons
 
