@@ -55,7 +55,6 @@ async def catch_youtube_dldata(c, q):
     media_type, send_as, format_id, av_codec, video_id = cb_data.split("|")
     logger.info(cb_data)
 
-    filext = "%(title)s.%(ext)s"
     userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(user_id), video_id)
 
     if not os.path.isdir(userdir):
@@ -65,11 +64,10 @@ async def catch_youtube_dldata(c, q):
             [[InlineKeyboardButton("Downloading...", callback_data="down")]]
         )
     )
-    filepath = os.path.join(userdir, filext)
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
     fetch_media, caption = await yt_download(
-        video_id, media_type, av_codec, format_id, filepath
+        video_id, media_type, av_codec, format_id, userdir
     )
     if not fetch_media:
         await q.message.reply_text(caption)

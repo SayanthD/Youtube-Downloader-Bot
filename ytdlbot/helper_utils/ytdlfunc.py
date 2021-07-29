@@ -61,7 +61,7 @@ async def extract_formats(yturl):
 # https://stackoverflow.com/questions/33836593
 async def yt_download(video_id, media_type, av_codec, format_id, output):
     ytdl_opts = {
-        "outtmpl": output,
+        "outtmpl": f"{output}/%(title)s_[%(id)s].%(ext)s",
         "ignoreerrors": True,
         "nooverwrites": True,
         "continuedl": True,
