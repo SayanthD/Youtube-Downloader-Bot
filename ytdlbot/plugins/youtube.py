@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 
 from pyrogram import Client, filters
@@ -8,7 +9,9 @@ from ytdlbot import Config, user_time
 from ytdlbot.helper_utils.ffmfunc import fetch_thumb
 from ytdlbot.helper_utils.ytdlfunc import extract_formats
 
-ytregex = r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
+ytregex = re.compile(
+    r"^((?:https?:)?//)?((?:www|m)\.)?(youtube\.com|youtu.be)(/(?:[\w\-]+\?v=|embed/|v/)?)([\w\-]+)(\S+)?$"
+)
 
 
 @Client.on_message(filters.regex(ytregex))

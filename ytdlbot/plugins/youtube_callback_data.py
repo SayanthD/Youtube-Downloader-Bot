@@ -1,14 +1,13 @@
-import asyncio
 import logging
 import os
+import re
 import shutil
 
-from pyrogram import Client, ContinuePropagation
+from pyrogram import Client, filters
 from pyrogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     InputMediaAudio,
-    InputMediaDocument,
     InputMediaVideo,
 )
 
@@ -17,43 +16,20 @@ from ytdlbot.helper_utils.util import media_duration, width_and_height
 from ytdlbot.helper_utils.ytdlfunc import yt_download
 
 logger = logging.getLogger(__name__)
+ytdata = re.compile(r"^(Video|Audio)_(\d{1,3})_(empty|none)_([\w\-]+)$")
 
 
-@Client.on_callback_query()
-async def catch_youtube_fmtid(_, m):
-    cb_data = m.data
-    if cb_data.startswith("ytdata"):
-        _, media_type, format_id, av_codec, video_id = cb_data.split("|")
-        logger.info(cb_data)
-        if media_type:
-            buttons = InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(
-                            f"{media_type}",
-                            callback_data=f"{media_type}|{media_type}|{format_id}|{av_codec}|{video_id}",
-                        ),
-                        InlineKeyboardButton(
-                            "Document",
-                            callback_data=f"{media_type}|Document|{format_id}|{av_codec}|{video_id}",
-                        ),
-                    ]
-                ]
-            )
-        await m.edit_message_reply_markup(buttons)
-
-    else:
-        raise ContinuePropagation
-
-
-@Client.on_callback_query()
+@Client.on_callback_query(filters.regex(ytdata))
 async def catch_youtube_dldata(c, q):
     cb_data = q.data
+    logger.info(cb_data)
     # caption = q.message.caption
     user_id = q.from_user.id
-    # Callback Data Assigning
-    media_type, send_as, format_id, av_codec, video_id = cb_data.split("|")
-    logger.info(cb_data)
+    # Callback Regex capturing
+    media_type = q.matches[0].group(1)
+    format_id = q.matches[0].group(2)
+    av_codec = q.matches[0].group(3)
+    video_id = q.matches[0].group(4)
 
     userdir = os.path.join(os.getcwd(), Config.DOWNLOAD_DIR, str(user_id), video_id)
 
@@ -76,20 +52,27 @@ async def catch_youtube_dldata(c, q):
         return
     else:
         logger.info(os.listdir(userdir))
+        file_name = None
         for content in os.listdir(userdir):
             if ".jpg" not in content:
                 file_name = os.path.join(userdir, content)
 
+    if not os.path.exists(file_name):
+        await q.message.reply_text("Failed")
+        logger.info("Media not found")
+        return
+
     thumb = os.path.join(userdir, video_id + ".jpg")
-    width = height = 0
-    if os.path.isfile(thumb):
-        width, height = width_and_height(thumb)
-    else:
+    if not os.path.exists(thumb):
         thumb = None
+        width = height = 0
+    else:
+        width, height = width_and_height(thumb)
 
     duration = media_duration(file_name)
-    if send_as == "Audio":
-        med = InputMediaAudio(
+    media = None
+    if media_type == "Audio":
+        media = InputMediaAudio(
             media=file_name,
             thumb=thumb,
             duration=duration,
@@ -97,8 +80,8 @@ async def catch_youtube_dldata(c, q):
             title=caption,
         )
 
-    elif send_as == "Video":
-        med = InputMediaVideo(
+    elif media_type == "Video":
+        media = InputMediaVideo(
             media=file_name,
             thumb=thumb,
             width=width,
@@ -108,26 +91,11 @@ async def catch_youtube_dldata(c, q):
             supports_streaming=True,
         )
 
-    else:
-        med = InputMediaDocument(
-            media=file_name,
-            thumb=thumb,
-            caption=caption,
-        )
-
-    if med:
-        loop = asyncio.get_event_loop()
-        loop.create_task(send_file(c, q, med, userdir))
-    else:
-        logger.info("Media not found")
-
-
-async def send_file(c, q, med, userdir):
-    logger.info(med)
+    logger.info(media)
     try:
         await c.send_chat_action(chat_id=q.message.chat.id, action="upload_document")
         # this one is not working
-        await q.edit_message_media(media=med)
+        await q.edit_message_media(media=media)
     except Exception as e:
         logger.info(e)
         await q.edit_message_text(e)

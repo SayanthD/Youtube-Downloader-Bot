@@ -48,7 +48,7 @@ async def extract_formats(yturl):
                 [
                     InlineKeyboardButton(
                         f"{media_type} {format_note} [{listed['ext']}] {filesize}",
-                        callback_data=f"ytdata|{media_type}|{listed['format_id']}|{av_codec}|{info['id']}",
+                        callback_data=f"{media_type}_{listed['format_id']}_{av_codec}_{info['id']}",
                     )
                 ]
             )
