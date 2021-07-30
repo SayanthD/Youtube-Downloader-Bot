@@ -1,4 +1,4 @@
-from datetime import datetime
+# from datetime import datetime
 
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
@@ -35,7 +35,7 @@ def time_formatter(seconds: int) -> str:
     return result or "0 seconds"
 
 
-def make_template(title, duration, upload_date):
+"""def make_template(title, duration, upload_date):
     # Thanks to Userge-X
     # The template below was inspired after,
     # https://github.com/code-rgb/USERGE-X/blob/alpha/userge/plugins/bot/utube_inline.py#L448-L474
@@ -46,4 +46,4 @@ def make_template(title, duration, upload_date):
         f"<b>Duration:</b> {formatted_duration}\n"
         f"<b>Uploaded on</b> {uploaded}"
     )
-    return template
+    return template"""

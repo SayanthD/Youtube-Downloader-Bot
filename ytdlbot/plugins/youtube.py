@@ -29,7 +29,7 @@ async def ytdl(_, message):
     url = message.text.strip()
     await message.reply_chat_action("typing")
     try:
-        video_id, thumbnail_url, template, buttons = await extract_formats(url)
+        video_id, thumbnail_url, title, buttons = await extract_formats(url)
 
         now = datetime.now()
         user_time[user_id] = now + timedelta(minutes=Config.TIMEOUT)
@@ -50,7 +50,7 @@ async def ytdl(_, message):
     try:
         await asyncio.gather(
             message.reply_photo(
-                thumbnail, caption=template, reply_markup=InlineKeyboardMarkup(buttons)
+                thumbnail, caption=title, reply_markup=InlineKeyboardMarkup(buttons)
             ),
             status.delete(),
         )

@@ -10,7 +10,7 @@ from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError
 
 from ytdlbot import Config
-from ytdlbot.helper_utils.util import humanbytes, make_template
+from ytdlbot.helper_utils.util import humanbytes
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +34,9 @@ async def extract_formats(yturl):
         download=False,
         ytdl_opts={"extractor_args": {"youtube": {"skip": ["dash", "hls"]}}},
     )
-    template = make_template(
+    """template = make_template(
         info.get("title"), info.get("duration"), info.get("upload_date")
-    )
+    )"""
     for listed in info.get("formats"):
         media_type = "Audio" if "audio" in listed.get("format") else "Video"
         format_note = listed.get("format_note", "format")
@@ -56,7 +56,7 @@ async def extract_formats(yturl):
             ]
         )
 
-    return info.get("id"), info.get("thumbnail"), template, buttons
+    return info.get("id"), info.get("thumbnail"), info.get("title"), buttons
 
 
 # The codes below were referenced after
