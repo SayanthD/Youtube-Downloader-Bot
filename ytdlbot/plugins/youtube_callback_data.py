@@ -6,8 +6,6 @@ import shutil
 
 from pyrogram import Client, filters
 from pyrogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
     InputMediaAudio,
     InputMediaVideo,
 )
@@ -36,11 +34,7 @@ async def catch_youtube_dldata(_, q):
 
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
-    await q.edit_message_reply_markup(
-        InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Downloading...", callback_data="down")]]
-        )
-    )
+    await q.edit_message_caption("Downloading...!")
     # await q.edit_message_reply_markup([[InlineKeyboardButton("Processing..")]])
 
     fetch_media, caption = await yt_download(
