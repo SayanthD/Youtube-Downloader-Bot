@@ -1,3 +1,4 @@
+import asyncio
 import re
 from datetime import datetime, timedelta
 
@@ -39,13 +40,16 @@ async def ytdl(_, message):
 
     status = await message.reply_text("Fetching thumbnail...", quote=True)
     if Config.CUSTOM_THUMB:
+        await asyncio.sleep(Config.EDIT_TIME)
         await status.edit_text("Found Custom thumbnail, Gotta pull it now.")
         thumbnail_url = Config.CUSTOM_THUMB
     thumbnail = await fetch_thumb(user_id, thumbnail_url, video_id)
     try:
-        await message.reply_photo(
-            thumbnail, caption=template, reply_markup=InlineKeyboardMarkup(buttons)
+        await asyncio.gather(
+            message.reply_photo(
+                thumbnail, caption=template, reply_markup=InlineKeyboardMarkup(buttons)
+            ),
+            status.delete(),
         )
-        await status.delete()
     except Exception as e:
         await status.edit(f"<code>{e}</code> #Error")

@@ -22,7 +22,7 @@ class Config:
     TIMEOUT = int(os.environ.get("TIMEOUT", 0))  # time in minute
     MAX_SIZE = int(os.environ.get("MAX_SIZE", 1900000000))
     CUSTOM_THUMB = os.environ.get("CUSTOM_THUMB", None)
-    # EDIT_TIME = int(os.environ.get("EDIT_TIME", 0))
+    EDIT_TIME = int(os.environ.get("EDIT_TIME", 3))
 
 
 class String:

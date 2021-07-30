@@ -48,12 +48,12 @@ async def extract_formats(yturl):
         if listed.get("acodec") == "none" or listed.get("vcodec") == "none":
             av_codec = "none"
         buttons.append(
-                [
-                    InlineKeyboardButton(
-                        f"{media_type} {format_note} [{listed['ext']}] {filesize}",
-                        callback_data=f"{media_type}_{listed['format_id']}_{av_codec}_{info['id']}",
-                    )
-                ]
+            [
+                InlineKeyboardButton(
+                    f"{media_type} {format_note} [{listed['ext']}] {filesize}",
+                    f"{media_type}_{listed['format_id']}_{av_codec}_{info['id']}",
+                )
+            ]
         )
 
     return info.get("id"), info.get("thumbnail"), template, buttons

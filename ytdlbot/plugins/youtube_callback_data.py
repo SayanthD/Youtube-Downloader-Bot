@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import re
@@ -20,7 +21,7 @@ ytdata = re.compile(r"^(Video|Audio)_(\d{1,3})_(empty|none)_([\w\-]+)$")
 
 
 @Client.on_callback_query(filters.regex(ytdata))
-async def catch_youtube_dldata(c, q):
+async def catch_youtube_dldata(_, q):
     cb_data = q.data
     logger.info(cb_data)
     # caption = q.message.caption
@@ -46,9 +47,8 @@ async def catch_youtube_dldata(c, q):
         video_id, media_type, av_codec, format_id, userdir
     )
     if not fetch_media:
-        await q.message.reply_text(caption)
+        await asyncio.gather(q.message.reply_text(caption), q.message.delete())
         shutil.rmtree(userdir, ignore_errors=True)
-        await q.message.delete()
         return
     else:
         logger.info(os.listdir(userdir))
@@ -58,7 +58,7 @@ async def catch_youtube_dldata(c, q):
                 file_name = os.path.join(userdir, content)
 
     if not os.path.exists(file_name):
-        await q.message.reply_text("Failed")
+        await asyncio.gather(q.message.reply_text("Failed"), q.message.delete())
         logger.info("Media not found")
         return
 
@@ -93,8 +93,6 @@ async def catch_youtube_dldata(c, q):
 
     logger.info(media)
     try:
-        await c.send_chat_action(chat_id=q.message.chat.id, action="upload_document")
-        # this one is not working
         await q.edit_message_media(media=media)
     except Exception as e:
         logger.info(e)
