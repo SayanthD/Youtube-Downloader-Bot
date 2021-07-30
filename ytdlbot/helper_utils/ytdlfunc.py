@@ -32,7 +32,7 @@ async def extract_formats(yturl):
     info = await yt_extract_info(
         video_url=yturl,
         download=False,
-        ytdl_opts={"youtube_include_dash_manifest": False},
+        ytdl_opts={"extractor_args": {"youtube": {"skip": ["dash", "hls"]}}},
     )
     template = make_template(
         info.get("title"), info.get("duration"), info.get("upload_date")
@@ -68,7 +68,7 @@ async def yt_download(video_id, media_type, av_codec, format_id, output):
         "ignoreerrors": True,
         "nooverwrites": True,
         "continuedl": True,
-        "noplaylist": True,
+        # "noplaylist": True,
         "max_filesize": Config.MAX_SIZE,
     }
     if media_type == "Audio":
