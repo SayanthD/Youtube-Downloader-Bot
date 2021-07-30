@@ -1,4 +1,4 @@
 TgCrypto
 Pyrogram
-youtube_dl
+yt_dlp
 hachoir

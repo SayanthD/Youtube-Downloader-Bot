@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup
-from youtube_dl.utils import DownloadError, ExtractorError
+from yt_dlp.utils import DownloadError, ExtractorError
 
 from ytdlbot import Config, user_time
 from ytdlbot.helper_utils.ffmfunc import fetch_thumb

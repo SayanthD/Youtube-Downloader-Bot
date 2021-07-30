@@ -6,8 +6,8 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from pyrogram.types import InlineKeyboardButton
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import DownloadError
+from yt_dlp import YoutubeDL
+from yt_dlp.utils import DownloadError
 
 from ytdlbot import Config
 from ytdlbot.helper_utils.util import humanbytes, make_template
