@@ -35,7 +35,10 @@ async def ytdl(_, message):
         user_time[user_id] = now + timedelta(minutes=Config.TIMEOUT)
 
     except (DownloadError, ExtractorError) as error:
-        await message.reply_text(f"<b>{error}</b>", quote=True)
+        await asyncio.gather(
+            message.reply_chat_action("cancel"),
+            message.reply_text(f"{error}", quote=True, disable_web_page_preview=True),
+        )
         return
 
     status = await message.reply_text("Fetching thumbnail...", quote=True)
