@@ -70,6 +70,8 @@ async def yt_download(video_id, media_type, av_codec, format_id, output):
         "continuedl": True,
         # "noplaylist": True,
         "max_filesize": Config.MAX_SIZE,
+        "restrictfilenames": True,
+        "trim_file_name": 50,
     }
     if media_type == "Audio":
         ytdl_opts.update(
